@@ -1,0 +1,12 @@
+# programming
+*.o
+*.pyc
+__pycache__/*
+
+# editor
+*~
+*.swp
+
+# datasets
+*.csv
+

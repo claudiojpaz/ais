@@ -28,6 +28,12 @@ def new_vessel(AIS_line, vessel_list):
     ais['status'] = []
     ais['status'].append(AIS_line[11])
 
+    ais['length'] = AIS_line[12]
+    ais['width'] = AIS_line[13]
+    ais['draft'] = AIS_line[14]
+    ais['cargo'] = AIS_line[15]
+    ais['tclass'] = AIS_line[16]
+
     vessel_list.append(ais)
     #
 

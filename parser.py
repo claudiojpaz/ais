@@ -2,8 +2,9 @@
 
 import sys
 import datetime
+import numpy as np
 
-def new_vessel(AIS_line, vessel_list):
+def new_vessel(AIS_line, vessel_list, datai):
     ais = {}
     ais['mmsi'] = AIS_line[0]
 
@@ -35,6 +36,7 @@ def new_vessel(AIS_line, vessel_list):
     ais['tclass'] = AIS_line[16]
 
     vessel_list.append(ais)
+    datai[int(ais['mmsi'])] = len(vessel_list)-1
     #
 
 def update_vessel(AIS_line, vessel_list, i):
@@ -52,13 +54,13 @@ def update_vessel(AIS_line, vessel_list, i):
     vessel_list[i]['status'].append(AIS_line[11])
     #
 
-def extract_ais_data(filename, hour, data):
+def extract_ais_data(filename, hour, data, datai):
     f = open(filename, 'r')
     # MMSI,BaseDateTime,LAT,LON,SOG,COG,Heading,VesselName,IMO,
     # CallSign,VesselType,Status,Length,Width,Draft,Cargo,TranscieverClass
 
     ais = {}
-    ais['mmsi'] = ''
+    ais['mmsi'] = '0'
     data.append(ais)
 
     text = f.readline()
@@ -67,17 +69,14 @@ def extract_ais_data(filename, hour, data):
 
         date_time_obj = datetime.datetime.strptime(record[1], '%Y-%m-%dT%H:%M:%S')
         if hour == date_time_obj.hour:
-            mmsi = record[0]
+            mmsi = int(record[0])
 
-            for vessel in data:
-                if vessel['mmsi'] == mmsi:
-                    update_vessel(record, data, data.index(vessel))
-                    break
+            if int(data[datai[mmsi]]['mmsi']) == mmsi and mmsi != 0:
+                update_vessel(record, data, datai[mmsi])
             else:
-                new_vessel(record, data)
+                new_vessel(record, data, datai)
 
     f.close()
-    data.pop(0)
 
     return data
 
@@ -91,14 +90,9 @@ if __name__ == "__main__":
         print(f'Usage:\n{sys.argv[0]} AIS_filename hour')
         sys.exit(1)
 
+    datai = np.zeros(1999999999, dtype=np.int32)
     data = []
-    extract_ais_data(filename, hour, data)
-
-    mmsi = '367783480'
-    for vessel in data:
-        if vessel['mmsi'] == mmsi:
-            print(vessel)
-            break
+    extract_ais_data(filename, hour, data, datai)
 
     print(len(data))
 
